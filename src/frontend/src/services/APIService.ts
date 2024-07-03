@@ -4,7 +4,7 @@ class APIService {
   private appVersion: string;
 
   private constructor() {
-    this.baseUrl = "http://localhost:3002";
+    this.baseUrl = "http://localhost:5000";
     this.appVersion = "1.0.0";
   }
 
@@ -27,6 +27,7 @@ class APIService {
     };
 
     if (auth) {
+      const token = localStorage.getItem('ACCES_TOKEN');
       // get access token somehow
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;

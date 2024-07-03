@@ -1,53 +1,90 @@
 import React, { useState } from "react";
+import { 
+  TextField, 
+  Button, 
+  Typography, 
+  Container, 
+  Box, 
+  Paper,
+  Snackbar,
+  Alert
+} from "@mui/material";
+import APIService from "../services/APIService";
 
 function Login() {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [message, setMessage] = useState<string>("");
+  const [isError, setIsError] = useState<boolean>(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch("http://localhost:3002/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
-    });
-    const data = await response.json();
-    if (response.ok) {
-      // do something with access token
-
+    try {
+      const data = await APIService.request("/login", "POST", { username, password });
       setMessage("Login successful");
-    } else {
-      setMessage(data.message);
+
+      setIsError(false);
+    } catch (error) {
+      setMessage("An error occurred. Please try again.");
+      setIsError(true);
     }
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <div>
-          <label>Username:</label>
-          <input
-            type="text"
+    <Container maxWidth="xs">
+      <Paper elevation={3} sx={{ mt: 8, p: 4 }}>
+        <Typography component="h1" variant="h5" align="center" gutterBottom>
+          Login
+        </Typography>
+        <Box component="form" onSubmit={handleLogin} noValidate sx={{ mt: 1 }}>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="username"
+            label="Username"
+            name="username"
+            autoComplete="username"
+            autoFocus
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
             type="password"
+            id="password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-        </div>
-        <button type="submit">Login</button>
-      </form>
-      {message && <p>{message}</p>}
-    </div>
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+          >
+            Login
+          </Button>
+        </Box>
+      </Paper>
+      <Snackbar 
+        open={!!message} 
+        autoHideDuration={6000} 
+        onClose={() => setMessage("")}
+      >
+        <Alert 
+          onClose={() => setMessage("")} 
+          severity={isError ? "error" : "success"} 
+          sx={{ width: '100%' }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
+    </Container>
   );
 }
 

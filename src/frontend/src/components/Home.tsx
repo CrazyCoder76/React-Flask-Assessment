@@ -1,41 +1,73 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
+import { 
+  Typography, 
+  Box, 
+  Container, 
+  Button, 
+  CircularProgress 
+} from "@mui/material";
+import APIService from "../services/APIService";
+import AudioRecorder from "./AudioRecorder";
 
 function Home() {
   const [username, setUsername] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchUser = async () => {
-      // get access token
+      setLoading(true);
 
-      if (token) {
-        const response = await fetch("http://localhost:3002/user", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const data = await response.json();
-        if (response.ok) {
-          setUsername(data.username);
-        }
+      try {
+
+        const data = await APIService.request("/user", "GET");
+        setUsername(data.username);
+      } catch (error) {
+
+        console.error("Error fetching user:", error);
       }
+
+      setLoading(false);
     };
 
     fetchUser();
   }, []);
 
   return (
-    <div>
-      <h2>Home</h2>
-      {username ? (
-        <p>Welcome, {username}!</p>
-      ) : (
-        <p>
-          Please <Link to="/login">login</Link> or{" "}
-          <Link to="/register">register</Link>.
-        </p>
-      )}
-    </div>
+    <Container maxWidth="sm">
+      <Box sx={{ mt: 4, textAlign: 'center' }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Welcome
+        </Typography>
+        
+        {loading ? (
+          <CircularProgress />
+        ) : username ? (
+          <AudioRecorder/>
+        ) : (
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body1" gutterBottom>
+              Please log in or register to continue.
+            </Typography>
+            <Button 
+              component={RouterLink} 
+              to="/login" 
+              variant="contained" 
+              sx={{ mr: 2 }}
+            >
+              Login
+            </Button>
+            <Button 
+              component={RouterLink} 
+              to="/register" 
+              variant="outlined"
+            >
+              Register
+            </Button>
+          </Box>
+        )}
+      </Box>
+    </Container>
   );
 }
 
