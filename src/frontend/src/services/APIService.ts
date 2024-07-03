@@ -5,7 +5,7 @@ class APIService {
 
   private constructor() {
     this.baseUrl = "http://localhost:5000";
-    this.appVersion = "1.0.0";
+    this.appVersion = "1.2.0";
   }
 
   public static getInstance(): APIService {
@@ -19,16 +19,18 @@ class APIService {
     endpoint: string,
     method: string,
     body?: any,
-    auth: boolean = false
+    auth: boolean = false,
+    additionalHeaders: HeadersInit = {}
   ): Promise<any> {
     const headers: HeadersInit = {
       "Content-Type": "application/json",
       "app-version": this.appVersion,
+      ...additionalHeaders
     };
 
     if (auth) {
-      const token = localStorage.getItem('ACCES_TOKEN');
-      // get access token somehow
+      const token = localStorage.getItem('ACCESS_TOKEN');
+
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }

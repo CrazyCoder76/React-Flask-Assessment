@@ -3,3 +3,14 @@ Flask-SQLAlchemy==3.1.1
 Flask-Bcrypt==1.0.1
 Flask-JWT-Extended==4.6.0
 Flask-CORS==4.0.1
+openai-whisper
+setuptools-rust
+numba
+numpy
+torch
+tqdm
+more-itertools
+tiktoken
+triton>=2.0.0,<3;platform_machine=="x86_64" and sys_platform=="linux" or sys_platform=="linux2"
+uuid
+cryptography.fernet

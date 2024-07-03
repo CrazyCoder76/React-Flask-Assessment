@@ -10,8 +10,11 @@ import {
   Alert
 } from "@mui/material";
 import APIService from "../services/APIService";
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
+  const navigate = useNavigate();
+
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [message, setMessage] = useState<string>("");
@@ -22,8 +25,10 @@ function Login() {
     try {
       const data = await APIService.request("/login", "POST", { username, password });
       setMessage("Login successful");
-
       setIsError(false);
+
+      localStorage.setItem("ACCESS_TOKEN", data.token);
+      navigate('/');
     } catch (error) {
       setMessage("An error occurred. Please try again.");
       setIsError(true);

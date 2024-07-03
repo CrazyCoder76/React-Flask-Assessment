@@ -16,16 +16,19 @@ function Home() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const token = sessionStorage.getItem("ACCESS_TOKEN");
-      if(!token) {
+      const token = localStorage.getItem("ACCESS_TOKEN");
+      if(token == undefined) {
+        setLoading(false);
         return;
       }
-      
+
       setLoading(true);
 
       try {
 
-        const data = await APIService.request("/user", "GET");
+        const data = await APIService.request("/user", "GET", undefined, true);
+        
+        setLoading(false);
         setUsername(data.username);
       } catch (error) {
 
@@ -48,7 +51,7 @@ function Home() {
         {loading ? (
           <CircularProgress />
         ) : username ? (
-          <AudioRecorder/>
+          <AudioRecorder />
         ) : (
           <Box sx={{ mt: 2 }}>
             <Typography variant="body1" gutterBottom>

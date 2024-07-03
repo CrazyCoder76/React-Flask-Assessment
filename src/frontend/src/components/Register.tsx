@@ -13,8 +13,11 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import APIService from "../services/APIService";
+import { useNavigate } from 'react-router-dom';
 
 function Register() {
+  const navigate = useNavigate();
+
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [message, setMessage] = useState<string>("");
@@ -23,10 +26,16 @@ function Register() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if(username == "" || password == "") {
+      setMessage("Please fill all fields");
+      return;
+    }
+
     try {
-      const data = await APIService.request("/user", "GET");
+      const data = await APIService.request("/register", "POST", {username, password});
       setMessage(data.message);
       setIsError(false);
+      navigate('/login');
     } catch (error) {
       setMessage("An error occurred. Please try again.");
       setIsError(true);
