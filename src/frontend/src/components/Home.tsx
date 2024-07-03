@@ -16,6 +16,11 @@ function Home() {
 
   useEffect(() => {
     const fetchUser = async () => {
+      const token = sessionStorage.getItem("ACCESS_TOKEN");
+      if(!token) {
+        return;
+      }
+      
       setLoading(true);
 
       try {

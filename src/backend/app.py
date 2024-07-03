@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_cors import CORS
+from packaging import version
 
 import os
 
@@ -33,6 +34,13 @@ def create_app():
     with app.app_context():
         db.create_all()
 
+    @app.before_request
+    def check_version():
+        if request.endpoint != 'index':  # Allow the index route without version check
+            client_version = request.headers.get('app-version')
+            if not client_version or version.parse(client_version) < version.parse('1.2.0'):
+                return jsonify({'message': 'Please update your client application'}), 426
+
     @app.route('/')
     def index():
         return jsonify({'status': 200})
@@ -40,9 +48,8 @@ def create_app():
     @app.route('/register', methods=['POST'])
     def register():
         data = request.get_json()
-        hashed_password = bcrypt.generate_password_hash(
-            data['password']).decode('utf-8')
-        new_user = User(username=data['username'], password=hashed_password)
+        hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+        new_user = User(username=data['username'], password=hashed_password, motto=data.get('motto', ''))
         db.session.add(new_user)
         db.session.commit()
         return jsonify({'message': 'User registered successfully'}), 201
@@ -52,8 +59,7 @@ def create_app():
         data = request.get_json()
         user = User.query.filter_by(username=data['username']).first()
         if user and bcrypt.check_password_hash(user.password, data['password']):
-            access_token = create_access_token(
-                identity={'username': user.username})
+            access_token = create_access_token(identity={'username': user.username})
             return jsonify({'token': access_token}), 200
         return jsonify({'message': 'Invalid credentials'}), 401
 
@@ -61,7 +67,11 @@ def create_app():
     @jwt_required()
     def user():
         current_user = get_jwt_identity()
-        # return user information
+        user = User.query.filter_by(username=current_user['username']).first()
+        return jsonify({
+            'username': user.username,
+            'motto': user.motto
+        }), 200
 
     return app
 
@@ -70,8 +80,9 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
+    motto = db.Column(db.String(4096))
 
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(port=3002, debug=True)
+    app.run(port=5000, debug=True)
